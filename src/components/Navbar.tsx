@@ -1,111 +1,78 @@
 'use client';
 
+import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Moon, Sun, BookOpen, Compass, LayoutDashboard, ShieldCheck, Menu, X } from 'lucide-react';
-import { useState } from 'react';
-import { useApp } from '@/context/AppContext';
-
-const NAV_LINKS = [
-  { href: '/', label: 'Home', icon: Compass },
-  { href: '/catalog', label: 'Opportunities', icon: Compass },
-  { href: '/courses', label: 'Courses', icon: BookOpen },
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin', label: 'Admin', icon: ShieldCheck },
-];
+import { useApp, Language } from '../context/AppContext';
+import { translations } from '../lib/translations';
 
 export default function Navbar() {
+  const { theme, toggleTheme, favorites, lang, setLang } = useApp();
   const pathname = usePathname();
-  const { state, dispatch } = useApp();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const t = translations[lang];
 
-  const toggleTheme = () =>
-    dispatch({ type: 'SET_THEME', payload: state.theme === 'dark' ? 'light' : 'dark' });
+  const navItems = [
+    { name: t.home, href: '/' },
+    { name: t.opps, href: '/opportunities' },
+    { name: t.courses, href: '/courses' },
+    { name: t.dashboard, href: '/dashboard' },
+    { name: t.admin, href: '/admin' },
+  ];
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-xl">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
-            <span className="text-white text-xs font-black">MH</span>
+    <nav className="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md transition-all">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex-shrink-0">
+            <Link href="/" className="text-xl font-bold tracking-wider text-indigo-600 dark:text-indigo-400">
+              MENTORIA<span className="text-slate-800 dark:text-slate-200 font-medium">HUB</span>
+            </Link>
           </div>
-          <span className="font-black text-lg tracking-tight text-[var(--text)]">
-            Mentoria<span className="text-indigo-500">Hub</span>
-          </span>
-        </Link>
 
-        {/* Desktop nav */}
-        <div className="hidden md:flex items-center gap-1">
-          {NAV_LINKS.map(({ href, label }) => {
-            const active = pathname === href;
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                  active
-                    ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface2)]'
-                }`}
-              >
-                {label}
-              </Link>
-            );
-          })}
-        </div>
+          <div className="hidden md:flex space-x-6">
+            {navItems.map((item) => {
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`text-sm font-medium transition-colors ${
+                    isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400 hover:text-indigo-500'
+                  }`}
+                >
+                  {item.name}
+                  {item.href === '/opportunities' && favorites.length > 0 && (
+                    <span className="ml-1 px-1.5 py-0.5 text-xs bg-pink-500 text-white rounded-full">{favorites.length}</span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
 
-        {/* Right actions */}
-        <div className="flex items-center gap-2">
-          {/* Theme toggle */}
-          <button
-            onClick={toggleTheme}
-            className="p-2 rounded-xl hover:bg-[var(--surface2)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
-            aria-label="Toggle theme"
-          >
-            {state.theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
+          <div className="flex items-center space-x-3">
+            {/* Тіл ауыстырғыш селект */}
+            <select
+              value={lang}
+              onChange={(e) => setLang(e.target.value as Language)}
+              className="bg-slate-100 dark:bg-slate-800 text-xs font-semibold px-2 py-1.5 rounded-xl cursor-pointer outline-none border-none"
+            >
+              <option value="kk">🇰🇿 ҚАЗ</option>
+              <option value="ru">🇷🇺 РУС</option>
+              <option value="en">🇺🇸 ENG</option>
+            </select>
 
-          {/* Avatar */}
-          <Link href="/dashboard">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold shadow cursor-pointer hover:scale-105 transition-transform">
-              {state.profile.avatar}
-            </div>
-          </Link>
-
-          {/* Mobile menu */}
-          <button
-            className="md:hidden p-2 rounded-xl hover:bg-[var(--surface2)] text-[var(--text-muted)]"
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+            <button
+              onClick={toggleTheme}
+              className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-medium"
+            >
+              {theme === 'light' ? '🌙' : '☀️'}
+            </button>
+            <Link href="/dashboard" className="hidden sm:inline-flex px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-xl">
+              {t.start}
+            </Link>
+          </div>
         </div>
       </div>
-
-      {/* Mobile drawer */}
-      {mobileOpen && (
-        <div className="md:hidden border-t border-[var(--border)] bg-[var(--surface)] px-4 pb-4">
-          {NAV_LINKS.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href;
-            return (
-              <Link
-                key={href}
-                href={href}
-                onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium mt-1 transition-all ${
-                  active
-                    ? 'bg-indigo-500/10 text-indigo-600'
-                    : 'text-[var(--text-muted)] hover:bg-[var(--surface2)]'
-                }`}
-              >
-                <Icon size={16} />
-                {label}
-              </Link>
-            );
-          })}
-        </div>
-      )}
     </nav>
   );
 }
