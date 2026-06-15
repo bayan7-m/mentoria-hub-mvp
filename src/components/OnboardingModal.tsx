@@ -1,246 +1,170 @@
 'use client';
 
-import { useState } from 'react';
-import { ChevronRight, ChevronLeft, Sparkles, User, BookOpen, Target } from 'lucide-react';
-import { useApp } from '@/context/AppContext';
-import { Grade, Goal, Interest } from '@/types';
+import React, { useState } from 'react';
+import { useApp } from '../context/AppContext';
 
-const INTERESTS: { value: Interest; label: string; emoji: string }[] = [
-  { value: 'STEM', label: 'STEM', emoji: '🔬' },
-  { value: 'Business', label: 'Business', emoji: '💼' },
-  { value: 'Programming', label: 'Programming', emoji: '💻' },
-  { value: 'Languages', label: 'Languages', emoji: '🌍' },
-  { value: 'Finance', label: 'Finance', emoji: '📈' },
-  { value: 'Science', label: 'Science', emoji: '⚗️' },
-  { value: 'Social', label: 'Social Impact', emoji: '🤝' },
-  { value: 'Arts', label: 'Arts & Design', emoji: '🎨' },
-];
-
-const GOALS: { value: Goal; label: string; emoji: string }[] = [
-  { value: 'University', label: 'Top University', emoji: '🎓' },
-  { value: 'Olympiads', label: 'Win Olympiads', emoji: '🏆' },
-  { value: 'Scholarships', label: 'Get Scholarship', emoji: '💰' },
-  { value: 'Career', label: 'Career Prep', emoji: '🚀' },
-  { value: 'Research', label: 'Research', emoji: '📚' },
-  { value: 'Entrepreneurship', label: 'Start a Business', emoji: '💡' },
-];
-
-const STEPS = ['welcome', 'grade', 'interests', 'goals'] as const;
-type Step = typeof STEPS[number];
+type Step = 'welcome' | 'profile' | 'interests' | 'goals';
+const STEPS: Step[] = ['welcome', 'profile', 'interests', 'goals'];
 
 export default function OnboardingModal() {
-  const { state, dispatch } = useApp();
+  // Ескі const state = useApp() орнына керек нәрселерді тікелей деструктуризация жасаймыз
+  const { profile, updateProfile, lang } = useApp();
   const [step, setStep] = useState<Step>('welcome');
   const [name, setName] = useState('');
-  const [grade, setGrade] = useState<Grade | null>(null);
-  const [interests, setInterests] = useState<Interest[]>([]);
-  const [goals, setGoals] = useState<Goal[]>([]);
+  const [grade, setGrade] = useState<number>(8);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
 
-  if (state.profile.onboardingCompleted) return null;
+  // Егер қолданушы онбордингтен өтіп қойса (немесе профильде белгіленсе), модалканы көрсетпейміз
+  if (profile?.isOnboarded) return null;
 
   const stepIndex = STEPS.indexOf(step);
 
-  const toggleInterest = (v: Interest) =>
-    setInterests((prev) =>
-      prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]
+  const handleNext = () => {
+    if (step === 'welcome') {
+      setStep('profile');
+    } else if (step === 'profile') {
+      if (!name.trim()) return alert(lang === 'kk' ? 'Есіміңізді енгізіңіз' : 'Введите ваше имя');
+      setStep('interests');
+    } else if (step === 'interests') {
+      setStep('goals');
+    } else if (step === 'goals') {
+      // Соңғы қадамда контекстке сақтаймыз
+      updateProfile({
+        name,
+        grade,
+        interests: selectedInterests,
+        isOnboarded: true
+      });
+    }
+  };
+
+  const toggleInterest = (interest: string) => {
+    setSelectedInterests(prev => 
+      prev.includes(interest) ? prev.filter(i => i !== interest) : [...prev, interest]
     );
-
-  const toggleGoal = (v: Goal) =>
-    setGoals((prev) =>
-      prev.includes(v) ? prev.filter((x) => x !== v) : [...prev, v]
-    );
-
-  const canNext = () => {
-    if (step === 'welcome') return name.trim().length >= 2;
-    if (step === 'grade') return grade !== null;
-    if (step === 'interests') return interests.length >= 1;
-    return true;
   };
 
-  const next = () => {
-    const idx = STEPS.indexOf(step);
-    if (idx < STEPS.length - 1) setStep(STEPS[idx + 1]);
-    else finish();
-  };
-
-  const back = () => {
-    const idx = STEPS.indexOf(step);
-    if (idx > 0) setStep(STEPS[idx - 1]);
-  };
-
-  const finish = () => {
-    dispatch({
-      type: 'COMPLETE_ONBOARDING',
-      payload: {
-        name: name || 'Student',
-        grade: grade!,
-        interests,
-        goals,
-      },
-    });
-  };
+  const interestsList = [
+    { id: 'Olympiads', kk: 'Олимпиадалар', ru: 'Олимпиады', en: 'Olympiads' },
+    { id: 'Hackathons', kk: 'Хакатондар', ru: 'Хакатоны', en: 'Hackathons' },
+    { id: 'IELTS', kk: 'IELTS дайындық', ru: 'Подготовка к IELTS', en: 'IELTS Prep' },
+    { id: 'SAT', kk: 'SAT дайындық', ru: 'Подготовка к SAT', en: 'SAT Prep' },
+    { id: 'Scientific Projects', kk: 'Ғылыми жобалар', ru: 'Научные проекты', en: 'Science Projects' },
+  ];
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="relative w-full max-w-lg bg-[var(--surface)] rounded-3xl shadow-2xl overflow-hidden">
-        {/* Progress bar */}
-        <div className="h-1 bg-[var(--surface2)]">
-          <div
-            className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500"
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+      <div className="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-100 dark:border-slate-700 animate-scale-up">
+        
+        {/* Прогресс бар */}
+        <div className="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden mb-6">
+          <div 
+            className="bg-indigo-600 h-full transition-all duration-300" 
             style={{ width: `${((stepIndex + 1) / STEPS.length) * 100}%` }}
-          />
+          ></div>
         </div>
 
-        <div className="p-8">
-          {/* STEP: welcome */}
-          {step === 'welcome' && (
-            <div className="text-center space-y-6">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center mx-auto shadow-lg">
-                <Sparkles size={28} className="text-white" />
+        {/* 1-ҚАДАМ: Қош келдіңіз */}
+        {step === 'welcome' && (
+          <div className="text-center space-y-4">
+            <div className="text-4xl">🚀</div>
+            <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">
+              {lang === 'kk' ? 'Mentoria Hub-қа қош келдіңіз!' : 'Добро пожаловать в Mentoria Hub!'}
+            </h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              {lang === 'kk' 
+                ? 'Платформаны сізге ыңғайлы етіп баптау үшін 3 қысқарақ сұраққа жауап беріңіз.' 
+                : 'Ответьте на 3 коротких вопроса, чтобы персонализировать платформу под себя.'}
+            </p>
+          </div>
+        )}
+
+        {/* 2-ҚАДАМ: Профиль мәліметтері */}
+        {step === 'profile' && (
+          <div className="space-y-4">
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+              {lang === 'kk' ? 'Өзіңіз туралы айтыңыз' : 'Расскажите о себе'}
+            </h3>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">{lang === 'kk' ? 'Есіміңіз' : 'Ваше имя'}</label>
+                <input 
+                  type="text" 
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Bayan"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent outline-none focus:border-indigo-500 text-sm"
+                />
               </div>
               <div>
-                <h2 className="text-2xl font-black text-[var(--text)]">Welcome to Mentoria Hub</h2>
-                <p className="mt-2 text-[var(--text-muted)] text-sm">
-                  Your personal platform for opportunities and learning. Let's set up your profile in 60 seconds.
-                </p>
-              </div>
-              <div className="text-left">
-                <label className="text-xs font-semibold text-[var(--text-muted)] uppercase tracking-wider">
-                  What's your name?
-                </label>
-                <div className="mt-2 relative">
-                  <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]" />
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && canNext() && next()}
-                    placeholder="e.g. Amir, Aigerim..."
-                    className="w-full pl-9 pr-4 py-3 rounded-xl border border-[var(--border)] bg-[var(--surface2)] text-[var(--text)] placeholder:text-[var(--text-muted)] focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                  />
-                </div>
+                <label className="block text-xs font-semibold text-slate-500 mb-1">{lang === 'kk' ? 'Сыныбыңыз (Мектеп)' : 'Ваш класс (Школа)'}</label>
+                <select 
+                  value={grade}
+                  onChange={(e) => setGrade(Number(e.target.value))}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent outline-none text-sm dark:bg-slate-800"
+                >
+                  {[7, 8, 9, 10, 11, 12].map(g => (
+                    <option key={g} value={g}>{g} {lang === 'kk' ? 'сынып' : 'класс'}</option>
+                  ))}
+                </select>
               </div>
             </div>
-          )}
-
-          {/* STEP: grade */}
-          {step === 'grade' && (
-            <div className="space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-                  <BookOpen size={20} className="text-indigo-500" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-black text-[var(--text)]">What grade are you in?</h2>
-                  <p className="text-xs text-[var(--text-muted)]">We'll filter opportunities by your grade level</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-4 gap-3">
-                {([8, 9, 10, 11] as Grade[]).map((g) => (
-                  <button
-                    key={g}
-                    onClick={() => setGrade(g)}
-                    className={`py-6 rounded-2xl text-2xl font-black border-2 transition-all ${
-                      grade === g
-                        ? 'border-indigo-500 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 scale-105 shadow-lg'
-                        : 'border-[var(--border)] bg-[var(--surface2)] text-[var(--text)] hover:border-indigo-300'
-                    }`}
-                  >
-                    {g}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* STEP: interests */}
-          {step === 'interests' && (
-            <div className="space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                  <Sparkles size={20} className="text-purple-500" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-black text-[var(--text)]">What are your interests?</h2>
-                  <p className="text-xs text-[var(--text-muted)]">Pick at least one — select multiple for best results</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {INTERESTS.map(({ value, label, emoji }) => (
-                  <button
-                    key={value}
-                    onClick={() => toggleInterest(value)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl border-2 text-sm font-semibold transition-all ${
-                      interests.includes(value)
-                        ? 'border-indigo-500 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'
-                        : 'border-[var(--border)] bg-[var(--surface2)] text-[var(--text)] hover:border-indigo-300'
-                    }`}
-                  >
-                    <span className="text-xl">{emoji}</span>
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* STEP: goals */}
-          {step === 'goals' && (
-            <div className="space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                  <Target size={20} className="text-amber-500" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-black text-[var(--text)]">What are your goals?</h2>
-                  <p className="text-xs text-[var(--text-muted)]">Optional — helps us prioritize recommendations</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {GOALS.map(({ value, label, emoji }) => (
-                  <button
-                    key={value}
-                    onClick={() => toggleGoal(value)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-2xl border-2 text-sm font-semibold transition-all ${
-                      goals.includes(value)
-                        ? 'border-amber-500 bg-amber-500/10 text-amber-600 dark:text-amber-400'
-                        : 'border-[var(--border)] bg-[var(--surface2)] text-[var(--text)] hover:border-amber-300'
-                    }`}
-                  >
-                    <span className="text-xl">{emoji}</span>
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Navigation */}
-          <div className="flex items-center justify-between mt-8">
-            {stepIndex > 0 ? (
-              <button
-                onClick={back}
-                className="flex items-center gap-1 text-sm text-[var(--text-muted)] hover:text-[var(--text)] transition-colors"
-              >
-                <ChevronLeft size={16} /> Back
-              </button>
-            ) : (
-              <div />
-            )}
-            <button
-              onClick={next}
-              disabled={!canNext()}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm transition-all ${
-                canNext()
-                  ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-lg hover:shadow-indigo-500/30 hover:scale-105 glow-pulse'
-                  : 'bg-[var(--surface2)] text-[var(--text-muted)] cursor-not-allowed'
-              }`}
-            >
-              {step === 'goals' ? 'Get Started' : 'Continue'}
-              <ChevronRight size={16} />
-            </button>
           </div>
-        </div>
+        )}
+
+        {/* 3-ҚАДАМ: Қызығушылықтар */}
+        {step === 'interests' && (
+          <div className="space-y-4">
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+              {lang === 'kk' ? 'Сізді не қызықтырады?' : 'Что вас интересует?'}
+            </h3>
+            <p className="text-xs text-slate-400">{lang === 'kk' ? 'Бірнешеуін таңдауға болады:' : 'Можно выбрать несколько:'}</p>
+            <div className="flex flex-wrap gap-2">
+              {interestsList.map(item => {
+                const isSelected = selectedInterests.includes(item.id);
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => toggleInterest(item.id)}
+                    className={`px-3 py-2 text-xs font-medium rounded-xl border transition-all ${
+                      isSelected 
+                        ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' 
+                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-400'
+                    }`}
+                  >
+                    {lang === 'kk' ? item.kk : lang === 'ru' ? item.ru : item.en}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* 4-ҚАДАМ: Мақсаттар */}
+        {step === 'goals' && (
+          <div className="text-center space-y-4">
+            <div className="text-4xl">🎯</div>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white">
+              {lang === 'kk' ? 'Барлығы дайын!' : 'Всё готово!'}
+            </h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              {lang === 'kk' 
+                ? 'Енді сіздің таңдауларыңыз бойынша басты бет пен жеке кабинет реттеледі.' 
+                : 'Теперь главная страница и личный кабинет будут настроены под ваши предпочтения.'}
+            </p>
+          </div>
+        )}
+
+        {/* Төменгі батырма */}
+        <button
+          onClick={handleNext}
+          className="w-full mt-6 py-3 font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-lg transition-all text-sm"
+        >
+          {step === 'goals' 
+            ? (lang === 'kk' ? 'Платформаға өту' : 'Перейти к платформе') 
+            : (lang === 'kk' ? 'Жалғастыру' : 'Продолжить')}
+        </button>
+
       </div>
     </div>
   );
