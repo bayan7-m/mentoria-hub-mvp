@@ -2,7 +2,7 @@
 // MENTORIA HUB — TYPE DEFINITIONS
 // ============================================================
 
-export type Grade = 8 | 9 | 10 | 11;
+export type Grade = 7 | 8 | 9 | 10 | 11 | 12;
 export type Interest = 'STEM' | 'Business' | 'Programming' | 'Languages' | 'Social' | 'Finance' | 'Science' | 'Arts';
 export type Goal = 'University' | 'Olympiads' | 'Scholarships' | 'Career' | 'Research' | 'Entrepreneurship';
 export type OpportunityCategory = 'STEM' | 'Business' | 'Programming' | 'Languages' | 'Social' | 'Finance' | 'Science' | 'Arts';
@@ -76,7 +76,14 @@ export interface StudentProfile {
   interests: Interest[];
   goals: Goal[];
   avatar: string;
-  onboardingCompleted: boolean;
+  isOnboarded: boolean;
+}
+
+export type UserProfile = StudentProfile;
+
+export interface UserProgress {
+  completedLessons: string[];
+  quizAnswers: { [quizId: string]: string };
 }
 
 // ─── Progress ────────────────────────────────────────────────

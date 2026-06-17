@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Opportunity, Course, UserProfile, UserProgress } from '../types';
+import { Opportunity, Course, UserProfile, UserProgress, Goal, Interest } from '../types';
 import { mockOpportunities, mockCourses } from '../lib/mockData';
 
 export type Language = 'kk' | 'ru' | 'en';
@@ -17,7 +17,7 @@ interface AppContextType {
   setLang: (lang: Language) => void;
   toggleTheme: () => void;
   toggleFavorite: (id: string) => void;
-  completeLesson: (courseId: string, lessonId: string, quizAnswers: { [quizId: string]: number }) => void;
+  completeLesson: (courseId: string, lessonId: string, quizAnswers: { [quizId: string]: string }) => void;
   updateProfile: (profile: Partial<UserProfile>) => void;
   addOpportunity: (opp: Opportunity) => void;
 }
@@ -34,8 +34,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<UserProfile>({
     name: '',
     grade: 8,
-    interests: [],
-    goals: '',
+    interests: [] as Interest[],
+    goals: [] as Goal[],
+    avatar: '',
     isOnboarded: false,
   });
 
@@ -72,7 +73,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('mentoria_favs', JSON.stringify(updated));
   };
 
-  const completeLesson = (courseId: string, lessonId: string, quizAnswers: { [quizId: string]: number }) => {
+  const completeLesson = (courseId: string, lessonId: string, quizAnswers: { [quizId: string]: string }) => {
     const currentCourseProgress = progress[courseId] || { completedLessons: [], quizAnswers: {} };
     const updatedLessons = currentCourseProgress.completedLessons.includes(lessonId)
       ? currentCourseProgress.completedLessons
@@ -117,8 +118,4 @@ export function useApp() {
   const context = useContext(AppContext);
   if (!context) throw new Error('useApp must be used within AppProvider');
   return context;
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 6809967 (update)

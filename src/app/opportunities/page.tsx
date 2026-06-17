@@ -66,7 +66,7 @@ export default function OpportunitiesPage() {
                 <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-3">{opp.description}</p>
                 <div className="text-xs space-y-1 pt-2 border-t border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400">
                   <div><strong>Формат:</strong> {opp.format}</div>
-                  <div><strong>Сыныптар:</strong> {opp.grade.join(', ')}-сыныптар</div>
+                  <div><strong>Сыныптар:</strong> {opp.grades.join(', ')}-сыныптар</div>
                   <div className="text-rose-500 font-medium"><strong>Дедлайн:</strong> {opp.deadline}</div>
                 </div>
               </div>

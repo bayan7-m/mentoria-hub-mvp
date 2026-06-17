@@ -2,8 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useApp } from '../context/AppContext';
-import { translations } from '../lib/translations';
+import { useApp } from '../../context/AppContext';
+import { translations } from '../../lib/translations';
 
 export default function LandingPage() {
   const { profile, lang } = useApp();
