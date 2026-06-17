@@ -1,40 +1,58 @@
-'use client';
+﻿'use client';
 
-import React, { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import OpportunityCard from '../../components/OpportunityCard';
+
+const categories = ['All', 'STEM', 'Business', 'Programming', 'Languages', 'Social', 'Finance'];
 
 export default function OpportunitiesPage() {
-  const { opportunities, favorites, toggleFavorite, profile } = useApp();
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const { opportunities, favorites, toggleFavorite, profile, t } = useApp();
+  const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('All');
 
-  // Егер оқушы онбордингтен өткен болса, оның қызығушылықтары бойынша басымдық береміз
-  const categories = ['All', 'STEM', 'Business', 'Programming', 'Science', 'Social Influence', 'Finance'];
-
-  const filteredOpps = opportunities.filter(opp => {
-    const matchesCategory = selectedCategory === 'All' || opp.category === selectedCategory;
-    return matchesCategory;
-  });
+  const filteredOpps = useMemo(
+    () =>
+      opportunities.filter((opp) => {
+        const matchesCategory = selectedCategory === 'All' || opp.category === selectedCategory;
+        const matchesSearch =
+          opp.title.toLowerCase().includes(search.toLowerCase()) ||
+          opp.description.toLowerCase().includes(search.toLowerCase());
+        return matchesCategory && matchesSearch;
+      }),
+    [opportunities, selectedCategory, search]
+  );
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Білім Беру Мүмкіндіктері</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            {profile.interests.length > 0 ? `Сіздің таңдаған бағыттарыңыз: ${profile.interests.join(', ')}` : 'Өзіңізге ыңғайлы конкурстар мен олимпиадаларды табыңыз'}
-          </p>
+    <div className="space-y-10 py-8">
+      <div className="space-y-4">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{t('opportunitiesTitle')}</h1>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              {profile.interests.length > 0
+                ? `${t('interestsSelected')} ${profile.interests.join(', ')}`
+                : t('interestsEmpty')}
+            </p>
+          </div>
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search opportunities"
+            className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 md:w-80"
+          />
         </div>
 
-        {/* Категория сүзгісі (Filters) */}
-        <div className="flex flex-wrap gap-2">
-          {categories.map(cat => (
+        <div className="flex flex-wrap gap-3">
+          {categories.map((cat) => (
             <button
               key={cat}
+              type="button"
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-xl border transition-all ${
+              className={`rounded-2xl px-4 py-2 text-sm font-medium transition ${
                 selectedCategory === cat
-                  ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
-                  : 'border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  ? 'bg-indigo-600 text-white'
+                  : 'border border-slate-200 bg-white text-slate-700 hover:border-indigo-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'
               }`}
             >
               {cat}
@@ -43,39 +61,21 @@ export default function OpportunitiesPage() {
         </div>
       </div>
 
-      {/* Каталог карталары */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredOpps.map(opp => {
-          const isFav = favorites.includes(opp.id);
-          return (
-            <div key={opp.id} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 p-6 shadow-sm flex flex-col justify-between hover:shadow-md transition-all">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-0.5 text-xs font-semibold bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 rounded-full">
-                    {opp.category}
-                  </span>
-                  <button
-                    onClick={() => toggleFavorite(opp.id)}
-                    className="text-xl transition-transform active:scale-75"
-                    aria-label="Bookmark"
-                  >
-                    {isFav ? '❤️' : '🤍'}
-                  </button>
-                </div>
-                <h3 className="text-xl font-bold tracking-tight">{opp.title}</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-3">{opp.description}</p>
-                <div className="text-xs space-y-1 pt-2 border-t border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-400">
-                  <div><strong>Формат:</strong> {opp.format}</div>
-                  <div><strong>Сыныптар:</strong> {opp.grades.join(', ')}-сыныптар</div>
-                  <div className="text-rose-500 font-medium"><strong>Дедлайн:</strong> {opp.deadline}</div>
-                </div>
-              </div>
-              <button className="w-full mt-4 py-2 text-sm font-medium text-center text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors">
-                Подать заявку
-              </button>
-            </div>
-          );
-        })}
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+        {filteredOpps.length === 0 ? (
+          <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
+            No opportunities found.
+          </div>
+        ) : (
+          filteredOpps.map((opp) => (
+            <OpportunityCard
+              key={opp.id}
+              opportunity={opp}
+              isFavorite={favorites.includes(opp.id)}
+              onToggleFavorite={() => toggleFavorite(opp.id)}
+            />
+          ))
+        )}
       </div>
     </div>
   );

@@ -1,71 +1,84 @@
-'use client';
+﻿'use client';
 
-import React from 'react';
-import { useApp } from '../../context/AppContext';
-import { Bookmark, GraduationCap, Clock, Award } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useApp } from '../../context/AppContext';
+import { useAuth } from '../../context/AuthContext';
+import { Bookmark, GraduationCap, Clock, Award } from 'lucide-react';
 
 export default function DashboardPage() {
-  const { profile, favorites, opportunities, courses, progress } = useApp();
+  const router = useRouter();
+  const { isAuthenticated } = useAuth();
+  const { profile, favorites, opportunities, courses, progress, t } = useApp();
 
-  // Таңдаулы олимпиадалар тізімі
-  const favOpportunities = opportunities.filter(o => favorites.includes(o.id));
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace('/login');
+    }
+  }, [isAuthenticated, router]);
 
-  // Оқып жатқан курстар саны мен прогресс
+  const favOpportunities = useMemo(
+    () => opportunities.filter((opp) => favorites.includes(opp.id)),
+    [opportunities, favorites]
+  );
+
   const activeCoursesCount = Object.keys(progress).length;
+  const completedLessonsTotal = Object.values(progress).reduce((sum, item) => sum + item.completedLessons.length, 0);
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
-    <div className="space-y-8 animate-fade-in py-4">
-      {/* Профиль карточкасы */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-8 rounded-3xl text-white shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">🎯 {profile.name || 'Жас Талант'}</h1>
-          <p className="text-indigo-100 text-sm mt-1">{profile.grade ? `${profile.grade}-сынып оқушысы` : 'Мектеп оқушысы'}</p>
-          <div className="flex flex-wrap gap-2 mt-4">
-            {profile.interests.map(interest => (
-              <span key={interest} className="bg-white/20 px-3 py-1 text-xs rounded-full font-medium">
-                #{interest}
-              </span>
-            ))}
-          </div>
-        </div>
-        <div className="bg-white/10 p-4 rounded-2xl border border-white/10 text-center backdrop-blur-md">
-          <div className="text-xs uppercase tracking-wider text-indigo-200 font-semibold">Аяқталған сабақтар</div>
-          <div className="text-3xl font-extrabold mt-1">
-            {Object.values(progress).reduce((acc, curr) => acc + curr.completedLessons.length, 0)}
-          </div>
-        </div>
-      </div>
-
-      <div className="grid lg:grid-cols-3 gap-8">
-        {/* Сол жақ: Оқып жатқан курстары */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
-            <div className="flex items-center space-x-2 mb-4">
-              <GraduationCap className="text-indigo-600" />
-              <h3 className="text-lg font-bold">Менің курстарым ({activeCoursesCount})</h3>
+    <div className="space-y-8 py-8">
+      <section className="rounded-[32px] bg-gradient-to-r from-indigo-600 to-purple-600 p-8 text-white shadow-xl">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">🎯 {profile.name || t('profileGreeting')}</h1>
+            <p className="mt-2 text-sm text-indigo-100">{profile.grade ? `${profile.grade}-${t('studentGrade')}` : t('studentGrade')}</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {profile.interests.map((interest) => (
+                <span key={interest} className="rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white">
+                  #{interest}
+                </span>
+              ))}
             </div>
+          </div>
 
+          <div className="rounded-3xl bg-white/10 p-5 text-center backdrop-blur-xl">
+            <p className="text-xs uppercase tracking-[0.24em] text-indigo-100">{t('firstStep')}</p>
+            <p className="mt-2 text-3xl font-bold">{completedLessonsTotal}</p>
+            <p className="text-sm text-indigo-100/80">Completed lessons</p>
+          </div>
+        </div>
+      </section>
+
+      <div className="grid gap-8 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-6">
+          <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+            <div className="flex items-center gap-3 text-slate-900 dark:text-white">
+              <GraduationCap className="text-indigo-600" />
+              <h2 className="text-xl font-bold">{t('myCourses')} ({activeCoursesCount})</h2>
+            </div>
             {activeCoursesCount === 0 ? (
-              <div className="text-center py-8 text-slate-400 text-sm">
-                Сіз әлі ешқандай курсты бастамадыңыз. 
-                <Link href="/courses" className="text-indigo-600 font-semibold ml-1 underline">Курстар каталогына өту</Link>
+              <div className="mt-8 rounded-3xl bg-slate-50 p-8 text-center text-slate-500 dark:bg-slate-900 dark:text-slate-400">
+                {t('noCourses')} <Link href="/courses" className="font-semibold text-indigo-600 hover:text-indigo-500">{t('browseCourses')}</Link>
               </div>
             ) : (
-              <div className="space-y-4">
-                {courses.map(course => {
+              <div className="mt-6 space-y-4">
+                {courses.map((course) => {
                   const courseProg = progress[course.id];
                   if (!courseProg) return null;
                   const pct = Math.round((courseProg.completedLessons.length / course.lessons.length) * 100);
-                  
                   return (
-                    <div key={course.id} className="p-4 border border-slate-100 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900/40">
-                      <div className="flex justify-between text-sm font-semibold mb-2">
+                    <div key={course.id} className="rounded-3xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
+                      <div className="flex items-center justify-between gap-4 text-sm font-semibold text-slate-900 dark:text-slate-100">
                         <span>{course.title}</span>
-                        <span className="text-indigo-600">{pct}%</span>
+                        <span>{pct}%</span>
                       </div>
-                      <div className="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
-                        <div className="bg-indigo-600 h-full" style={{ width: `${pct}%` }}></div>
+                      <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
+                        <div className="h-full bg-indigo-600" style={{ width: `${pct}%` }} />
                       </div>
                     </div>
                   );
@@ -74,28 +87,24 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Сақталған Олимпиадалар */}
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
-            <div className="flex items-center space-x-2 mb-4">
+          <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+            <div className="flex items-center gap-3 text-slate-900 dark:text-white">
               <Bookmark className="text-pink-500" />
-              <h3 className="text-lg font-bold">Таңдаулы мүмкіндіктер ({favOpportunities.length})</h3>
+              <h2 className="text-xl font-bold">{t('favoriteOpportunities')} ({favOpportunities.length})</h2>
             </div>
-
             {favOpportunities.length === 0 ? (
-              <div className="text-center py-8 text-slate-400 text-sm">
-                Сақталған олимпиадалар немесе конкурстар жоқ.
+              <div className="mt-8 rounded-3xl bg-slate-50 p-8 text-center text-slate-500 dark:bg-slate-900 dark:text-slate-400">
+                {t('noFavorites')}
               </div>
             ) : (
-              <div className="grid gap-4 sm:grid-cols-2">
-                {favOpportunities.map(opp => (
-                  <div key={opp.id} className="p-4 border border-slate-100 dark:border-slate-700 rounded-xl relative">
-                    <span className="text-[10px] uppercase font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-950 px-2 py-0.5 rounded-full">
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                {favOpportunities.map((opp) => (
+                  <div key={opp.id} className="rounded-3xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
+                    <span className="inline-flex rounded-full bg-indigo-50 px-2 py-1 text-[10px] font-bold uppercase tracking-[0.3em] text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-200">
                       {opp.category}
                     </span>
-                    <h4 className="font-bold text-sm mt-2">{opp.title}</h4>
-                    <p className="text-xs text-rose-500 font-semibold mt-2 flex items-center">
-                      <Clock size={12} className="mr-1" /> Дедлайн: {opp.deadline}
-                    </p>
+                    <h3 className="mt-3 text-sm font-semibold text-slate-900 dark:text-white">{opp.title}</h3>
+                    <p className="mt-2 text-xs text-rose-500 dark:text-rose-400">{t('deadline')}: {opp.deadline}</p>
                   </div>
                 ))}
               </div>
@@ -103,24 +112,20 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Оң жақ: Дедлайн Күнтізбесі мен Жетістіктер */}
-        <div className="space-y-6">
-          <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm">
-            <div className="flex items-center space-x-2 mb-4">
+        <aside className="space-y-6">
+          <div className="rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+            <div className="flex items-center gap-3 text-slate-900 dark:text-white">
               <Award className="text-amber-500" />
-              <h3 className="text-lg font-bold">Менің жетістіктерім</h3>
+              <h2 className="text-xl font-bold">{t('myAchievements')}</h2>
             </div>
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3 p-3 bg-amber-50 dark:bg-amber-950/20 rounded-xl">
-                <span className="text-2xl">🚀</span>
-                <div>
-                  <h4 className="text-xs font-bold text-amber-800 dark:text-amber-400">Алғашқы қадам</h4>
-                  <p className="text-[11px] text-slate-500">Платформаға тіркеліп, онбордингтен сәтті өттіңіз.</p>
-                </div>
+            <div className="mt-6 space-y-4">
+              <div className="rounded-3xl bg-amber-50 p-4 dark:bg-amber-950/20">
+                <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">{t('firstStep')}</p>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">{t('firstStepDesc')}</p>
               </div>
             </div>
           </div>
-        </div>
+        </aside>
       </div>
     </div>
   );

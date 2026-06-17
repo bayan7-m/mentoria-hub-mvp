@@ -1,78 +1,65 @@
-'use client';
+"use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useApp, Language } from '../context/AppContext';
-import { translations } from '../lib/translations';
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useApp } from "../context/AppContext";
 
 export default function Navbar() {
-  const { theme, toggleTheme, favorites, lang, setLang } = useApp();
+  const { t, lang, setLang, theme, toggleTheme } = useApp();
   const pathname = usePathname();
-  const t = translations[lang];
 
   const navItems = [
-    { name: t.home, href: '/' },
-    { name: t.opps, href: '/opportunities' },
-    { name: t.courses, href: '/courses' },
-    { name: t.dashboard, href: '/dashboard' },
-    { name: t.admin, href: '/admin' },
+    { name: t("home"), href: "/" },
+    { name: t("opps"), href: "/opportunities" },
+    { name: t("courses"), href: "/courses" },
+    { name: t("dashboard"), href: "/dashboard" },
   ];
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md transition-all">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex-shrink-0">
-            <Link href="/" className="text-xl font-bold tracking-wider text-indigo-600 dark:text-indigo-400">
-              MENTORIA<span className="text-slate-800 dark:text-slate-200 font-medium">HUB</span>
-            </Link>
-          </div>
+    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl shadow-sm dark:border-slate-800/80 dark:bg-slate-950/95">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+        <Link href="/" className="text-lg font-black tracking-[0.3em] text-slate-900 dark:text-white">
+          MENTORIAHUB
+        </Link>
 
-          <div className="hidden md:flex space-x-6">
-            {navItems.map((item) => {
-              const isActive = pathname === item.href;
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={`text-sm font-medium transition-colors ${
-                    isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400 hover:text-indigo-500'
-                  }`}
-                >
-                  {item.name}
-                  {item.href === '/opportunities' && favorites.length > 0 && (
-                    <span className="ml-1 px-1.5 py-0.5 text-xs bg-pink-500 text-white rounded-full">{favorites.length}</span>
-                  )}
-                </Link>
-              );
-            })}
-          </div>
+        <nav className="hidden items-center gap-8 md:flex">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`transition ${
+                  isActive ? "text-indigo-600 font-semibold" : "text-slate-600 hover:text-indigo-600"
+                }`}
+              >
+                {item.name}
+              </Link>
+            );
+          })}
+        </nav>
 
-          <div className="flex items-center space-x-3">
-            {/* Тіл ауыстырғыш селект */}
-            <select
-              value={lang}
-              onChange={(e) => setLang(e.target.value as Language)}
-              className="bg-slate-100 dark:bg-slate-800 text-xs font-semibold px-2 py-1.5 rounded-xl cursor-pointer outline-none border-none"
-            >
-              <option value="kk">🇰🇿 ҚАЗ</option>
-              <option value="ru">🇷🇺 РУС</option>
-              <option value="en">🇺🇸 ENG</option>
-            </select>
+        <div className="flex items-center gap-3">
+          <select
+            value={lang}
+            onChange={(e) => setLang(e.target.value as any)}
+            className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition hover:border-indigo-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          >
+            <option value="kk">ҚАЗ</option>
+            <option value="ru">РУС</option>
+            <option value="en">ENG</option>
+          </select>
 
-            <button
-              onClick={toggleTheme}
-              className="p-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-medium"
-            >
-              {theme === 'light' ? '🌙' : '☀️'}
-            </button>
-            <Link href="/dashboard" className="hidden sm:inline-flex px-3 py-1.5 text-xs font-medium text-white bg-indigo-600 rounded-xl">
-              {t.start}
-            </Link>
-          </div>
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 transition hover:border-indigo-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          >
+            {theme === "light" ? "🌙" : "☀️"}
+          </button>
         </div>
       </div>
-    </nav>
+    </header>
   );
 }
+
