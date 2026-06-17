@@ -1,10 +1,10 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 interface AuthContextType {
   isAuthenticated: boolean;
+  isReady: boolean;
   login: () => void;
   logout: () => void;
   register: () => void;
@@ -14,6 +14,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     try {
@@ -21,6 +22,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setIsAuthenticated(stored === "true");
     } catch (error) {
       setIsAuthenticated(false);
+    } finally {
+      setIsReady(true);
     }
   }, []);
 
@@ -52,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, register }}>
+    <AuthContext.Provider value={{ isAuthenticated, isReady, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );

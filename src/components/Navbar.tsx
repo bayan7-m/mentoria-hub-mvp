@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Moon, Sun } from "lucide-react";
 import { useApp } from "../context/AppContext";
 
 export default function Navbar() {
@@ -30,7 +31,7 @@ export default function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={`transition ${
-                  isActive ? "text-indigo-600 font-semibold" : "text-slate-600 hover:text-indigo-600"
+                  isActive ? "font-semibold text-indigo-600" : "text-slate-600 hover:text-indigo-600 dark:text-slate-300"
                 }`}
               >
                 {item.name}
@@ -42,8 +43,9 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           <select
             value={lang}
-            onChange={(e) => setLang(e.target.value as any)}
+            onChange={(e) => setLang(e.target.value as "kk" | "ru" | "en")}
             className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition hover:border-indigo-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            aria-label="Language"
           >
             <option value="kk">ҚАЗ</option>
             <option value="ru">РУС</option>
@@ -54,12 +56,12 @@ export default function Navbar() {
             type="button"
             onClick={toggleTheme}
             className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 transition hover:border-indigo-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            aria-label="Toggle theme"
           >
-            {theme === "light" ? "🌙" : "☀️"}
+            {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
           </button>
         </div>
       </div>
     </header>
   );
 }
-

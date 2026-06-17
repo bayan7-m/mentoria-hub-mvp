@@ -1,8 +1,8 @@
-﻿'use client';
+"use client";
 
-import { useMemo } from 'react';
-import { useApp } from '../../context/AppContext';
-import CourseCard from '../../components/CourseCard';
+import { useMemo } from "react";
+import { useApp } from "../../context/AppContext";
+import CourseCard from "../../components/CourseCard";
 
 export default function CoursesPage() {
   const { courses, progress, t } = useApp();
@@ -21,16 +21,14 @@ export default function CoursesPage() {
   return (
     <div className="space-y-10 py-8">
       <div className="space-y-3">
-        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{t('courses')}</h1>
-        <p className="max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-          Курстар каталогы мен оқу прогресін бір жерде қараңыз.
-        </p>
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{t("courses")}</h1>
+        <p className="max-w-2xl text-sm text-slate-500 dark:text-slate-400">{t("coursesDesc")}</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {coursesWithProgress.length === 0 ? (
           <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
-            Жүктелетін курстар жоқ.
+            {t("noCoursesCatalog")}
           </div>
         ) : (
           coursesWithProgress.map(({ course, percentage }) => (

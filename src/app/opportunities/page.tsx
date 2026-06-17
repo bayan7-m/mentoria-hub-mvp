@@ -1,23 +1,25 @@
-﻿'use client';
+"use client";
 
-import { useMemo, useState } from 'react';
-import { useApp } from '../../context/AppContext';
-import OpportunityCard from '../../components/OpportunityCard';
+import { useMemo, useState } from "react";
+import { useApp } from "../../context/AppContext";
+import OpportunityCard from "../../components/OpportunityCard";
 
-const categories = ['All', 'STEM', 'Business', 'Programming', 'Languages', 'Social', 'Finance'];
+const categories = ["All", "STEM", "Business", "Programming", "Languages", "Social", "Finance"];
 
 export default function OpportunitiesPage() {
   const { opportunities, favorites, toggleFavorite, profile, t } = useApp();
-  const [search, setSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
+  const [search, setSearch] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   const filteredOpps = useMemo(
     () =>
       opportunities.filter((opp) => {
-        const matchesCategory = selectedCategory === 'All' || opp.category === selectedCategory;
+        const matchesCategory = selectedCategory === "All" || opp.category === selectedCategory;
+        const query = search.toLowerCase();
         const matchesSearch =
-          opp.title.toLowerCase().includes(search.toLowerCase()) ||
-          opp.description.toLowerCase().includes(search.toLowerCase());
+          opp.title.toLowerCase().includes(query) ||
+          opp.description.toLowerCase().includes(query) ||
+          opp.organization.toLowerCase().includes(query);
         return matchesCategory && matchesSearch;
       }),
     [opportunities, selectedCategory, search]
@@ -28,17 +30,17 @@ export default function OpportunitiesPage() {
       <div className="space-y-4">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{t('opportunitiesTitle')}</h1>
-            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{t("opportunitiesTitle")}</h1>
+            <p className="mt-2 max-w-2xl text-sm text-slate-500 dark:text-slate-400">
               {profile.interests.length > 0
-                ? `${t('interestsSelected')} ${profile.interests.join(', ')}`
-                : t('interestsEmpty')}
+                ? `${t("interestsSelected")} ${profile.interests.join(", ")}`
+                : t("opportunitiesDesc")}
             </p>
           </div>
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search opportunities"
+            placeholder={t("searchPlaceholder")}
             className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-indigo-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 md:w-80"
           />
         </div>
@@ -51,11 +53,11 @@ export default function OpportunitiesPage() {
               onClick={() => setSelectedCategory(cat)}
               className={`rounded-2xl px-4 py-2 text-sm font-medium transition ${
                 selectedCategory === cat
-                  ? 'bg-indigo-600 text-white'
-                  : 'border border-slate-200 bg-white text-slate-700 hover:border-indigo-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'
+                  ? "bg-indigo-600 text-white"
+                  : "border border-slate-200 bg-white text-slate-700 hover:border-indigo-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
               }`}
             >
-              {cat}
+              {cat === "All" ? t("filtersAll") : cat}
             </button>
           ))}
         </div>
@@ -64,7 +66,7 @@ export default function OpportunitiesPage() {
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {filteredOpps.length === 0 ? (
           <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-950 dark:text-slate-400">
-            No opportunities found.
+            {t("noOpportunities")}
           </div>
         ) : (
           filteredOpps.map((opp) => (
