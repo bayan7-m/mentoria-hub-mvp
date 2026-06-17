@@ -46,8 +46,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     isOnboarded: false,
   });
 
-  const supportedLangs: Language[] = ["kk", "ru", "en"];
-
   useEffect(() => {
     try {
       const storedFavs = localStorage.getItem("mentoria_favs");
@@ -62,6 +60,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       if (storedProfile) setProfile(JSON.parse(storedProfile));
       if (storedTheme) setTheme(JSON.parse(storedTheme) as "light" | "dark");
       if (storedOpps) setOpportunities(JSON.parse(storedOpps));
+
+      const supportedLangs: Language[] = ["kk", "ru", "en"];
 
       if (storedLang && supportedLangs.includes(storedLang as Language)) {
         setLangState(storedLang as Language);

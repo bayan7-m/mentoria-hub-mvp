@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
 import { AppProvider } from '../context/AppContext';
 import { AuthProvider } from '../context/AuthContext';
-import Navbar from '../components/Navbar';
+import PageShell from '../components/PageShell';
 import OnboardingModal from '../components/OnboardingModal';
-import Footer from '../components/Footer';
 import './globals.css';
 
 export const metadata: Metadata = {
@@ -21,12 +20,10 @@ export default function RootLayout({
       <body>
         <AuthProvider>
           <AppProvider>
-            <Navbar />
-            <OnboardingModal />
-            <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+            <PageShell>
+              <OnboardingModal />
               {children}
-            </main>
-            <Footer />
+            </PageShell>
           </AppProvider>
         </AuthProvider>
       </body>
