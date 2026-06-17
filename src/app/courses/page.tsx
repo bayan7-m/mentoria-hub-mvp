@@ -7,7 +7,7 @@ export default function CoursesPage() {
   const { courses, progress, completeLesson } = useApp();
   const [selectedCourseId, setSelectedCourseId] = useState<string>(courses[0]?.id || '');
   const [activeLessonIndex, setActiveLessonIndex] = useState<number>(0);
-  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [quizScore, setQuizScore] = useState<string | null>(null);
 
   const currentCourse = courses.find(c => c.id === selectedCourseId) || courses[0];
@@ -19,13 +19,13 @@ export default function CoursesPage() {
   const completedCount = courseProgress.completedLessons.length;
   const progressPercentage = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0;
 
-  const handleQuizSubmit = (questionId: string, correctAns: number) => {
+  const handleQuizSubmit = (questionId: string, correctAns: string) => {
     if (selectedOption === null) return;
     
     const isCorrect = selectedOption === correctAns;
     setQuizScore(isCorrect ? "Керемет! Жауап дұрыс. 🎉" : "Қате, қайтадан көріңіз. ❌");
 
-    if (isCorrect) {
+    if (isCorrect && currentLesson) {
       completeLesson(selectedCourseId, currentLesson.id, { [questionId]: selectedOption });
     }
   };
@@ -99,30 +99,30 @@ export default function CoursesPage() {
             </div>
 
             {/* Интерактивті Тест Бөлімі */}
-            {currentLesson.quiz && currentLesson.quiz.map((q) => (
+            {currentLesson.quiz?.questions.map((q) => (
               <div key={q.id} className="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm space-y-4">
                 <h4 className="font-bold text-base text-slate-800 dark:text-slate-200">🧠 Бекіту тапсырмасы:</h4>
                 <p className="text-sm text-slate-600 dark:text-slate-400 font-medium">{q.question}</p>
                 
                 <div className="grid gap-2.5">
-                  {q.options.map((option, oIdx) => (
+                  {q.options.map((option) => (
                     <button
-                      key={oIdx}
-                      onClick={() => setSelectedOption(oIdx)}
+                      key={option.id}
+                      onClick={() => setSelectedOption(option.id)}
                       className={`w-full text-left p-3.5 rounded-xl border text-sm transition-all ${
-                        selectedOption === oIdx
+                        selectedOption === option.id
                           ? 'bg-indigo-600 border-indigo-600 text-white shadow-md font-medium'
                           : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
                       }`}
                     >
-                      {option}
+                      {option.text}
                     </button>
                   ))}
                 </div>
 
                 <div className="flex items-center justify-between pt-2">
                   <button
-                    onClick={() => handleQuizSubmit(q.id, q.correctAnswer)}
+                    onClick={() => handleQuizSubmit(q.id, q.correctOptionId)}
                     className="px-5 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl shadow-md transition-all"
                   >
                     Жауапты тексеру

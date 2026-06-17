@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import type { Grade, Interest } from '../types';
 
 type Step = 'welcome' | 'profile' | 'interests' | 'goals';
 const STEPS: Step[] = ['welcome', 'profile', 'interests', 'goals'];
@@ -11,8 +12,8 @@ export default function OnboardingModal() {
   const { profile, updateProfile, lang } = useApp();
   const [step, setStep] = useState<Step>('welcome');
   const [name, setName] = useState('');
-  const [grade, setGrade] = useState<number>(8);
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [grade, setGrade] = useState<Grade>(8);
+  const [selectedInterests, setSelectedInterests] = useState<Interest[]>([]);
 
   // Егер қолданушы онбордингтен өтіп қойса (немесе профильде белгіленсе), модалканы көрсетпейміз
   if (profile?.isOnboarded) return null;
@@ -38,18 +39,21 @@ export default function OnboardingModal() {
     }
   };
 
-  const toggleInterest = (interest: string) => {
+  const toggleInterest = (interest: Interest) => {
     setSelectedInterests(prev => 
       prev.includes(interest) ? prev.filter(i => i !== interest) : [...prev, interest]
     );
   };
 
-  const interestsList = [
-    { id: 'Olympiads', kk: 'Олимпиадалар', ru: 'Олимпиады', en: 'Olympiads' },
-    { id: 'Hackathons', kk: 'Хакатондар', ru: 'Хакатоны', en: 'Hackathons' },
-    { id: 'IELTS', kk: 'IELTS дайындық', ru: 'Подготовка к IELTS', en: 'IELTS Prep' },
-    { id: 'SAT', kk: 'SAT дайындық', ru: 'Подготовка к SAT', en: 'SAT Prep' },
-    { id: 'Scientific Projects', kk: 'Ғылыми жобалар', ru: 'Научные проекты', en: 'Science Projects' },
+  const interestsList: { id: Interest; kk: string; ru: string; en: string }[] = [
+      { id: 'STEM', kk: 'STEM', ru: 'STEM', en: 'STEM' },
+      { id: 'Business', kk: 'Бизнестің', ru: 'Бизнес', en: 'Business' },
+      { id: 'Programming', kk: 'Бағдарламалау', ru: 'Программирование', en: 'Programming' },
+      { id: 'Languages', kk: 'Тілдер', ru: 'Языки', en: 'Languages' },
+      { id: 'Social', kk: 'Әлеуметтік', ru: 'Социальное', en: 'Social' },
+      { id: 'Finance', kk: 'Қаржы', ru: 'Финансы', en: 'Finance' },
+      { id: 'Science', kk: 'Ғылым', ru: 'Наука', en: 'Science' },
+      { id: 'Arts', kk: 'Өнер', ru: 'Искусство', en: 'Arts' },
   ];
 
   return (
@@ -100,7 +104,7 @@ export default function OnboardingModal() {
                 <label className="block text-xs font-semibold text-slate-500 mb-1">{lang === 'kk' ? 'Сыныбыңыз (Мектеп)' : 'Ваш класс (Школа)'}</label>
                 <select 
                   value={grade}
-                  onChange={(e) => setGrade(Number(e.target.value))}
+                  onChange={(e) => setGrade(Number(e.target.value) as Grade)}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent outline-none text-sm dark:bg-slate-800"
                 >
                   {[7, 8, 9, 10, 11, 12].map(g => (
