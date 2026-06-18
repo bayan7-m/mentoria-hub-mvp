@@ -3,9 +3,25 @@
 // ============================================================
 
 export type Grade = 8 | 9 | 10 | 11;
-export type Interest = 'STEM' | 'Business' | 'Programming' | 'Languages' | 'Social' | 'Finance' | 'Science' | 'Arts';
+export type Language = 'kz' | 'ru' | 'eng';
+export type Interest =
+  | 'UI'
+  | 'STEM'
+  | 'Business'
+  | 'Programming'
+  | 'Science'
+  | 'Social Influence'
+  | 'Finance'
+  | 'ielts sat дайындықты';
 export type Goal = 'University' | 'Olympiads' | 'Scholarships' | 'Career' | 'Research' | 'Entrepreneurship';
-export type OpportunityCategory = 'STEM' | 'Business' | 'Programming' | 'Languages' | 'Social' | 'Finance' | 'Science' | 'Arts';
+export type OpportunityCategory =
+  | 'STEM'
+  | 'Business'
+  | 'Programming'
+  | 'Science'
+  | 'Social Influence'
+  | 'Finance'
+  | 'ielts sat дайындықты';
 export type OpportunityFormat = 'Online' | 'Offline' | 'Hybrid';
 export type CourseLevel = 'Beginner' | 'Intermediate' | 'Advanced';
 
@@ -58,7 +74,7 @@ export interface Opportunity {
   organization: string;
   category: OpportunityCategory;
   format: OpportunityFormat;
-  deadline: string;        // ISO date string
+  deadline: string;
   description: string;
   requirements: string[];
   tags: Interest[];
@@ -72,6 +88,15 @@ export interface Opportunity {
 // ─── Student Profile ─────────────────────────────────────────
 export interface StudentProfile {
   name: string;
+  email: string;
+  iin: string;
+  phone: string;
+  school: string;
+  city: string;
+  language: Language;
+  dateOfBirth: string;
+  parentName: string;
+  parentPhone: string;
   grade: Grade | null;
   interests: Interest[];
   goals: Goal[];
@@ -79,12 +104,40 @@ export interface StudentProfile {
   onboardingCompleted: boolean;
 }
 
+// ─── Auth ────────────────────────────────────────────────────
+export interface RegisteredUser {
+  email: string;
+  password: string;
+  profile: StudentProfile;
+}
+
+export interface RegisterPayload {
+  name: string;
+  email: string;
+  password: string;
+  iin: string;
+  phone: string;
+  school: string;
+  city: string;
+  language: Language;
+  dateOfBirth: string;
+  parentName: string;
+  parentPhone: string;
+  grade: Grade;
+  interests: Interest[];
+}
+
+export interface LoginPayload {
+  email: string;
+  password: string;
+}
+
 // ─── Progress ────────────────────────────────────────────────
 export interface LessonProgress {
   lessonId: string;
   completed: boolean;
   quizPassed: boolean;
-  quizScore: number;      // 0–100
+  quizScore: number;
 }
 
 export interface CourseProgress {
@@ -104,6 +157,9 @@ export interface AppState {
   courses: Course[];
   theme: 'light' | 'dark';
   adminAuthenticated: boolean;
+  registeredUsers: RegisteredUser[];
+  isAuthenticated: boolean;
+  currentUserEmail: string | null;
 }
 
 // ─── Admin ───────────────────────────────────────────────────

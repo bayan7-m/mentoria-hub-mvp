@@ -2,16 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Moon, Sun, BookOpen, Compass, LayoutDashboard, ShieldCheck, Menu, X } from 'lucide-react';
+import { Moon, Sun, BookOpen, Compass, LayoutDashboard, Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { useApp } from '@/context/AppContext';
 
 const NAV_LINKS = [
-  { href: '/', label: 'Home', icon: Compass },
-  { href: '/catalog', label: 'Opportunities', icon: Compass },
-  { href: '/courses', label: 'Courses', icon: BookOpen },
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/admin', label: 'Admin', icon: ShieldCheck },
+  { href: '/', label: 'Басты бет', icon: Compass },
+  { href: '/opportunities', label: 'Мүмкіндіктер', icon: Compass },
+  { href: '/courses', label: 'Курстар', icon: BookOpen },
+  { href: '/dashboard', label: 'Кабинет', icon: LayoutDashboard },
 ];
 
 export default function Navbar() {
@@ -25,7 +24,6 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
-        {/* Logo */}
         <Link href="/" className="flex items-center gap-2 group">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
             <span className="text-white text-xs font-black">MH</span>
@@ -35,7 +33,6 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-1">
           {NAV_LINKS.map(({ href, label }) => {
             const active = pathname === href;
@@ -55,25 +52,30 @@ export default function Navbar() {
           })}
         </div>
 
-        {/* Right actions */}
         <div className="flex items-center gap-2">
-          {/* Theme toggle */}
           <button
             onClick={toggleTheme}
             className="p-2 rounded-xl hover:bg-[var(--surface2)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
-            aria-label="Toggle theme"
+            aria-label="Тақырыпты ауыстыру"
           >
             {state.theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
           </button>
 
-          {/* Avatar */}
-          <Link href="/dashboard">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold shadow cursor-pointer hover:scale-105 transition-transform">
-              {state.profile.avatar}
-            </div>
-          </Link>
+          {state.isAuthenticated ? (
+            <Link href="/dashboard">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 flex items-center justify-center text-white text-xs font-bold shadow cursor-pointer hover:scale-105 transition-transform">
+                {state.profile.avatar || 'MH'}
+              </div>
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="px-4 py-2 text-sm font-semibold text-white bg-indigo-500 hover:bg-indigo-600 rounded-full transition-all"
+            >
+              Кіру
+            </Link>
+          )}
 
-          {/* Mobile menu */}
           <button
             className="md:hidden p-2 rounded-xl hover:bg-[var(--surface2)] text-[var(--text-muted)]"
             onClick={() => setMobileOpen(!mobileOpen)}
@@ -83,7 +85,6 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile drawer */}
       {mobileOpen && (
         <div className="md:hidden border-t border-[var(--border)] bg-[var(--surface)] px-4 pb-4">
           {NAV_LINKS.map(({ href, label, icon: Icon }) => {
