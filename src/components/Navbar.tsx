@@ -1,5 +1,6 @@
-'use client';
+"use client";
 
+<<<<<<< HEAD
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Moon, Sun, BookOpen, Compass, LayoutDashboard, Menu, X } from 'lucide-react';
@@ -12,16 +13,26 @@ const NAV_LINKS = [
   { href: '/courses', label: 'Курстар', icon: BookOpen },
   { href: '/dashboard', label: 'Кабинет', icon: LayoutDashboard },
 ];
+=======
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { Moon, Sun } from "lucide-react";
+import { useApp } from "../context/AppContext";
+>>>>>>> 38dd114a6663c72340115d0a845f3a735e1fc721
 
 export default function Navbar() {
+  const { t, lang, setLang, theme, toggleTheme } = useApp();
   const pathname = usePathname();
-  const { state, dispatch } = useApp();
-  const [mobileOpen, setMobileOpen] = useState(false);
 
-  const toggleTheme = () =>
-    dispatch({ type: 'SET_THEME', payload: state.theme === 'dark' ? 'light' : 'dark' });
+  const navItems = [
+    { name: t("home"), href: "/" },
+    { name: t("opps"), href: "/opportunities" },
+    { name: t("courses"), href: "/courses" },
+    { name: t("dashboard"), href: "/dashboard" },
+  ];
 
   return (
+<<<<<<< HEAD
     <nav className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--surface)]/80 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
         <Link href="/" className="flex items-center gap-2 group">
@@ -36,25 +47,51 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-1">
           {NAV_LINKS.map(({ href, label }) => {
             const active = pathname === href;
+=======
+    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 backdrop-blur-xl shadow-sm dark:border-slate-800/80 dark:bg-slate-950/95">
+      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+        <Link href="/" className="text-lg font-black tracking-[0.3em] text-slate-900 dark:text-white">
+          MENTORIAHUB
+        </Link>
+
+        <nav className="hidden items-center gap-8 md:flex">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href;
+>>>>>>> 38dd114a6663c72340115d0a845f3a735e1fc721
             return (
               <Link
-                key={href}
-                href={href}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-                  active
-                    ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'
-                    : 'text-[var(--text-muted)] hover:text-[var(--text)] hover:bg-[var(--surface2)]'
+                key={item.href}
+                href={item.href}
+                className={`transition ${
+                  isActive ? "font-semibold text-indigo-600" : "text-slate-600 hover:text-indigo-600 dark:text-slate-300"
                 }`}
               >
-                {label}
+                {item.name}
               </Link>
             );
           })}
-        </div>
+        </nav>
 
+        <div className="flex items-center gap-3">
+          <select
+            value={lang}
+            onChange={(e) => setLang(e.target.value as "kk" | "ru" | "en")}
+            className="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition hover:border-indigo-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            aria-label="Language"
+          >
+            <option value="kk">ҚАЗ</option>
+            <option value="ru">РУС</option>
+            <option value="en">ENG</option>
+          </select>
+
+<<<<<<< HEAD
         <div className="flex items-center gap-2">
+=======
+>>>>>>> 38dd114a6663c72340115d0a845f3a735e1fc721
           <button
+            type="button"
             onClick={toggleTheme}
+<<<<<<< HEAD
             className="p-2 rounded-xl hover:bg-[var(--surface2)] text-[var(--text-muted)] hover:text-[var(--text)] transition-all"
             aria-label="Тақырыпты ауыстыру"
           >
@@ -108,5 +145,15 @@ export default function Navbar() {
         </div>
       )}
     </nav>
+=======
+            className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-700 transition hover:border-indigo-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            aria-label="Toggle theme"
+          >
+            {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+          </button>
+        </div>
+      </div>
+    </header>
+>>>>>>> 38dd114a6663c72340115d0a845f3a735e1fc721
   );
 }

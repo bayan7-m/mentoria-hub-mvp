@@ -1,5 +1,6 @@
 'use client';
 
+<<<<<<< HEAD
 import React from 'react';
 import Link from 'next/link';
 import { useApp } from '../context/AppContext';
@@ -7,9 +8,15 @@ import { useApp } from '../context/AppContext';
 export default function LandingPage() {
   const { state } = useApp();
   const profile = state.profile;
+=======
+import Hero from '../components/Hero';
+import FeaturesSection from '../components/FeaturesSection';
+>>>>>>> 38dd114a6663c72340115d0a845f3a735e1fc721
 
+export default function HomePage() {
   return (
     <div className="space-y-16 py-8">
+<<<<<<< HEAD
       <div className="text-center max-w-3xl mx-auto space-y-6 animate-fade-in">
         <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
           Білім Мүмкіндіктері Мен Асинхронды Оқу Бір Жерде
@@ -70,6 +77,10 @@ export default function LandingPage() {
           </p>
         </div>
       </div>
+=======
+      <Hero />
+      <FeaturesSection />
+>>>>>>> 38dd114a6663c72340115d0a845f3a735e1fc721
     </div>
   );
 }

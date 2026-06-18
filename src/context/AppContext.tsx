@@ -1,5 +1,6 @@
-'use client';
+"use client";
 
+<<<<<<< HEAD
 import React, {
   createContext,
   useContext,
@@ -282,12 +283,59 @@ interface AppContextValue {
 const AppContext = createContext<AppContextValue | null>(null);
 
 const STORAGE_KEY = 'mentoria_hub_state_v3';
+=======
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { Opportunity, Course, UserProfile, UserProgress, Goal, Interest } from "../types";
+import { mockOpportunities, mockCourses } from "../lib/mockData";
+import { translations } from "../lib/translations";
+
+export type Language = "kk" | "ru" | "en";
+
+interface AppContextType {
+  opportunities: Opportunity[];
+  courses: Course[];
+  favorites: string[];
+  progress: { [courseId: string]: UserProgress };
+  profile: UserProfile;
+  theme: "light" | "dark";
+  lang: Language;
+  setLang: (lang: Language) => void;
+  t: (key: string) => string;
+  toggleTheme: () => void;
+  toggleFavorite: (id: string) => void;
+  completeLesson: (
+    courseId: string,
+    lessonId: string,
+    quizAnswers: { [quizId: string]: string }
+  ) => void;
+  updateProfile: (profile: Partial<UserProfile>) => void;
+  addOpportunity: (opp: Opportunity) => void;
+}
+
+const AppContext = createContext<AppContextType | undefined>(undefined);
+>>>>>>> 38dd114a6663c72340115d0a845f3a735e1fc721
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
+  const [opportunities, setOpportunities] = useState<Opportunity[]>(mockOpportunities);
+  const [courses] = useState<Course[]>(mockCourses);
+  const [favorites, setFavorites] = useState<string[]>([]);
+  const [progress, setProgress] = useState<{ [courseId: string]: UserProgress }>({});
+  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [lang, setLangState] = useState<Language>("kk");
+  const [profile, setProfile] = useState<UserProfile>({
+    name: "",
+    grade: 8,
+    interests: [] as Interest[],
+    goals: [] as Goal[],
+    avatar: "",
+    isOnboarded: false,
+  });
+
+  const supportedLangs: Language[] = ["kk", "ru", "en"];
 
   useEffect(() => {
     try {
+<<<<<<< HEAD
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const saved = JSON.parse(raw) as Partial<AppState>;
@@ -305,12 +353,35 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             courses: saved.courses ?? MOCK_COURSES,
           },
         });
+=======
+      const storedFavs = localStorage.getItem("mentoria_favs");
+      const storedProgress = localStorage.getItem("mentoria_progress");
+      const storedProfile = localStorage.getItem("mentoria_profile");
+      const storedTheme = localStorage.getItem("mentoria_theme");
+      const storedLang = localStorage.getItem("mentoria_lang");
+      const storedOpps = localStorage.getItem("mentoria_opps");
+
+      if (storedFavs) setFavorites(JSON.parse(storedFavs));
+      if (storedProgress) setProgress(JSON.parse(storedProgress));
+      if (storedProfile) setProfile(JSON.parse(storedProfile));
+      if (storedTheme) setTheme(JSON.parse(storedTheme) as "light" | "dark");
+      if (storedOpps) setOpportunities(JSON.parse(storedOpps));
+
+      if (storedLang && supportedLangs.includes(storedLang as Language)) {
+        setLangState(storedLang as Language);
+      } else if (typeof navigator !== "undefined") {
+        const browserCode = (navigator.language || "").slice(0, 2) as Language;
+        const initialLang = supportedLangs.includes(browserCode) ? browserCode : "kk";
+        setLangState(initialLang);
+        localStorage.setItem("mentoria_lang", initialLang);
+>>>>>>> 38dd114a6663c72340115d0a845f3a735e1fc721
       }
-    } catch {
-      // ignore parse errors
+    } catch (e) {
+      // ignore localStorage parsing errors
     }
   }, []);
 
+<<<<<<< HEAD
   useEffect(() => {
     try {
       const toSave: Partial<AppState> = {
@@ -353,23 +424,59 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     },
     [state.courses, state.courseProgress]
   );
+=======
+  const setLang = (newLang: Language) => {
+    setLangState(newLang);
+    try {
+      localStorage.setItem("mentoria_lang", newLang);
+    } catch (e) {}
+  };
 
-  const isSaved = useCallback(
-    (id: string) => state.savedOpportunityIds.includes(id),
-    [state.savedOpportunityIds]
-  );
+  const t = (key: string) => {
+    return (translations as any)[lang]?.[key] ?? key;
+  };
 
-  const isEnrolled = useCallback(
-    (courseId: string) => !!state.courseProgress[courseId]?.enrolled,
-    [state.courseProgress]
-  );
+  const toggleTheme = () => {
+    const nextTheme = theme === "light" ? "dark" : "light";
+    setTheme(nextTheme);
+    try {
+      localStorage.setItem("mentoria_theme", JSON.stringify(nextTheme));
+    } catch (e) {}
+  };
+>>>>>>> 38dd114a6663c72340115d0a845f3a735e1fc721
 
-  const isLessonCompleted = useCallback(
-    (courseId: string, lessonId: string) =>
-      !!state.courseProgress[courseId]?.lessons[lessonId]?.completed,
-    [state.courseProgress]
-  );
+  const toggleFavorite = (id: string) => {
+    const updated = favorites.includes(id) ? favorites.filter((fId) => fId !== id) : [...favorites, id];
+    setFavorites(updated);
+    try {
+      localStorage.setItem("mentoria_favs", JSON.stringify(updated));
+    } catch (e) {}
+  };
 
+  const completeLesson = (
+    courseId: string,
+    lessonId: string,
+    quizAnswers: { [quizId: string]: string }
+  ) => {
+    const currentCourseProgress = progress[courseId] || { completedLessons: [], quizAnswers: {} };
+    const updatedLessons = currentCourseProgress.completedLessons.includes(lessonId)
+      ? currentCourseProgress.completedLessons
+      : [...currentCourseProgress.completedLessons, lessonId];
+
+    const updatedProgress = {
+      ...progress,
+      [courseId]: {
+        completedLessons: updatedLessons,
+        quizAnswers: { ...currentCourseProgress.quizAnswers, ...quizAnswers },
+      },
+    };
+    setProgress(updatedProgress);
+    try {
+      localStorage.setItem("mentoria_progress", JSON.stringify(updatedProgress));
+    } catch (e) {}
+  };
+
+<<<<<<< HEAD
   const getRecommendedOpportunities = useCallback((): Opportunity[] => {
     const { interests } = state.profile;
     if (!interests.length) return state.opportunities;
@@ -395,6 +502,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       interests.some((i) => c.tags.includes(i) || c.category === i)
     );
   }, [state.courses, state.profile]);
+=======
+  const updateProfile = (fields: Partial<UserProfile>) => {
+    const updated = { ...profile, ...fields };
+    setProfile(updated);
+    try {
+      localStorage.setItem("mentoria_profile", JSON.stringify(updated));
+    } catch (e) {}
+  };
+
+  const addOpportunity = (opp: Opportunity) => {
+    const updated = [opp, ...opportunities];
+    setOpportunities(updated);
+    try {
+      localStorage.setItem("mentoria_opps", JSON.stringify(updated));
+    } catch (e) {}
+  };
+>>>>>>> 38dd114a6663c72340115d0a845f3a735e1fc721
 
   const login = useCallback(
     (payload: LoginPayload): boolean => {
@@ -423,6 +547,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
     <AppContext.Provider
       value={{
+<<<<<<< HEAD
         state,
         dispatch,
         getCourseProgressPercent,
@@ -433,15 +558,39 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         getRecommendedCourses,
         login,
         register,
+=======
+        opportunities,
+        courses,
+        favorites,
+        progress,
+        profile,
+        theme,
+        lang,
+        setLang,
+        t,
+        toggleTheme,
+        toggleFavorite,
+        completeLesson,
+        updateProfile,
+        addOpportunity,
+>>>>>>> 38dd114a6663c72340115d0a845f3a735e1fc721
       }}
     >
-      {children}
+      <div className={theme === "dark" ? "dark bg-slate-900 text-white min-h-screen" : "bg-slate-50 text-slate-900 min-h-screen"}>
+        {children}
+      </div>
     </AppContext.Provider>
   );
 }
 
 export function useApp() {
+<<<<<<< HEAD
   const ctx = useContext(AppContext);
   if (!ctx) throw new Error('useApp must be used inside AppProvider');
   return ctx;
+=======
+  const context = useContext(AppContext);
+  if (!context) throw new Error("useApp must be used within AppProvider");
+  return context;
+>>>>>>> 38dd114a6663c72340115d0a845f3a735e1fc721
 }
